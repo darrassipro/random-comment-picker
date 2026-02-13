@@ -1,118 +1,225 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook Comment Picker (Fixed)</title>
+    <title>FB Random Comment Picker</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 12px; width: 450px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; }
-        h2 { color: #1877f2; margin-bottom: 20px; }
-        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-        input:focus { border-color: #1877f2; }
-        button { width: 95%; padding: 12px; margin: 10px 0; background: #1877f2; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background 0.3s; }
-        button:hover { background: #166fe5; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        #status { margin: 10px 0; font-size: 14px; color: #65676b; font-weight: 500; }
-        .result { margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; text-align: left; display: none; border: 1px solid #adcfff; word-wrap: break-word; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px; 
+            margin: 0;
+        }
+        .container { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+        }
+        h1 { color: #1877f2; text-align: center; margin-top: 0; }
+        .login-section { text-align: center; margin: 20px 0; }
+        .login-section fb\\:login-button { text-align: center; }
+        .picker-section { display: none; }
+        .picker-section.active { display: block; }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            box-sizing: border-box; 
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #1877f2;
+        }
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background: linear-gradient(135deg, #1877f2 0%, #0a66c2 100%);
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(24,119,242,0.4);
+        }
+        button:active { transform: translateY(0); }
+        .result { 
+            margin-top: 20px; 
+            padding: 20px; 
+            background: #f0f7ff; 
+            border-left: 4px solid #1877f2;
+            border-radius: 5px; 
+            display: none;
+            animation: slideIn 0.3s ease-in-out;
+        }
+        .result.active { display: block; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .winner-name { color: #1877f2; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+        .winner-comment { color: #333; font-size: 14px; line-height: 1.5; }
+        .error { background: #ffe0e0; border-left-color: #ff4444; color: #cc0000; }
+        .loading { text-align: center; color: #1877f2; }
+        .user-info { 
+            background: #f5f5f5; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            margin: 10px 0; 
+            font-size: 14px; 
+            text-align: center;
+        }
+        .logout-btn {
+            background: #e0e0e0;
+            color: #333;
+            padding: 8px 16px;
+            font-size: 12px;
+            width: auto;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>FB Random Picker</h2>
-    <div id="status">Initializing SDK...</div>
+    <h1>🎉 FB Random Comment Picker</h1>
     
-    <input type="text" id="postId" placeholder="Enter Facebook Post ID (e.g. 939135105350773)">
-    <button id="pickBtn" onclick="startPicking()" disabled>Login & Pick Winner</button>
+    <div class="login-section" id="loginSection">
+        <p>Login to get started:</p>
+        <fb:login-button scope="public_profile,pages_read_engagement" onlogin="checkLoginState();"></fb:login-button>
+        <button onclick="fbLogin()" style="margin-top: 10px; background: #1877f2;">📘 Login with Facebook</button>
+    </div>
 
-    <div class="result" id="result"></div>
+    <div class="picker-section" id="pickerSection">
+        <div class="user-info" id="userInfo"></div>
+        <input type="text" id="postId" placeholder="Enter Post ID (e.g., 939135105350773)">
+        <button onclick="fetchComments()">🎲 Pick Random Winner</button>
+        <button class="logout-btn" onclick="logoutFB()">Logout</button>
+        <div class="result" id="result"></div>
+    </div>
 </div>
 
-<div id="fb-root"></div>
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
-
 <script>
-    // 1. REPLACE THIS WITH YOUR ACTUAL APP ID
-    const APP_ID = 'YOUR_APP_ID_HERE'; 
+    // Your Configuration ID / App ID
+    const APP_ID = '889592040642068';
+    let accessToken = null;
 
+    // Initialize Facebook SDK
     window.fbAsyncInit = function() {
         FB.init({
-            appId      : APP_ID,
-            cookie     : true,
-            xfbml      : true,
-            version    : 'v19.0'
+            appId: APP_ID,
+            cookie: true,
+            xfbml: true,
+            version: 'v19.0'
         });
-        
-        document.getElementById('status').innerText = "✅ SDK Ready (HTTPS detected)";
-        document.getElementById('pickBtn').disabled = false;
+        FB.XFBML.parse();
     };
 
-    function startPicking() {
-        const postId = document.getElementById("postId").value.trim();
-        const resultDiv = document.getElementById("result");
+    // Load the Facebook SDK script
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    function checkLoginState() {
+        FB.getLoginStatus(function(response) {
+            if (response.status === 'connected') {
+                accessToken = response.authResponse.accessToken;
+                showPickerUI(response.authResponse.userID);
+            } else {
+                alert('Please login to continue.');
+            }
+        });
+    }
+
+    function fbLogin() {
+        FB.login(function(response) {
+            if (response.authResponse) {
+                checkLoginState();
+            }
+        }, {scope: 'public_profile,pages_read_engagement'});
+    }
+
+    function showPickerUI(userID) {
+        // Get user info
+        FB.api('/me', function(response) {
+            document.getElementById('userInfo').innerHTML = `Logged in as: <b>${response.name}</b>`;
+        });
         
-        if (!postId) {
-            alert("Please enter a Post ID first!");
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('pickerSection').classList.add('active');
+    }
+
+    function logoutFB() {
+        FB.logout(function(response) {
+            accessToken = null;
+            document.getElementById('pickerSection').classList.remove('active');
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('result').classList.remove('active');
+        });
+    }
+
+    async function fetchComments() {
+        if (!accessToken) {
+            alert('Please login first');
             return;
         }
 
-        // Login with necessary permissions
-        FB.login(function(response) {
-            if (response.authResponse) {
-                const token = response.authResponse.accessToken;
-                fetchComments(postId, token);
-            } else {
-                resultDiv.style.display = "block";
-                resultDiv.innerHTML = "❌ User cancelled login or did not authorize the app.";
-            }
-        }, {scope: 'public_profile,user_posts'}); 
-    }
-
-    async function fetchComments(postId, token) {
+        const postId = document.getElementById("postId").value.trim();
         const resultDiv = document.getElementById("result");
-        resultDiv.style.display = "block";
-        resultDiv.innerHTML = "⏳ Fetching comments from Meta... (this may take a moment)";
+        
+        if (!postId) return alert("Enter Post ID");
+
+        resultDiv.classList.remove('active');
+        resultDiv.innerHTML = '<div class="loading">🔄 Fetching comments...</div>';
+        resultDiv.classList.add('active');
 
         let comments = [];
-        // FIXED: Added backticks for template literal
-        let url = `https://graph.facebook.com/v19.0/${postId}/comments?access_token=${token}&limit=100`;
+        let url = `https://graph.facebook.com/v19.0/${postId}/comments?access_token=${accessToken}&limit=100&fields=id,message,from`;
 
         try {
             while (url) {
                 const response = await fetch(url);
                 const data = await response.json();
 
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
+                if (data.error) throw new Error(data.error.message);
 
-                if (data.data) {
-                    comments = comments.concat(data.data);
-                }
-                
-                // Handle pagination if there are many comments
+                comments = comments.concat(data.data.filter(c => c.message));
                 url = (data.paging && data.paging.next) ? data.paging.next : null;
             }
 
             if (comments.length === 0) {
-                resultDiv.innerHTML = "ℹ️ No comments found. Note: If the post is private or from a Profile, Meta might return 0 results due to privacy restrictions.";
+                resultDiv.innerHTML = "No comments found. Check the Post ID or permissions.";
                 return;
             }
 
-            // Randomly select one
             const winner = comments[Math.floor(Math.random() * comments.length)];
-
             resultDiv.innerHTML = `
-                <strong style="color:#1877f2">🎉 Winner Found!</strong><br><br>
-                <strong>User ID:</strong> ${winner.from ? winner.from.id : 'Hidden'}<br>
-                <strong>Name:</strong> ${winner.from ? winner.from.name : 'Private User'}<br>
-                <strong>Comment:</strong> "${winner.message}"
+                <div class="winner-name">🎊 ${winner.from ? winner.from.name : 'Anonymous'}</div>
+                <div class="winner-comment">"${winner.message}"</div>
+                <div style="margin-top: 10px; font-size: 12px; color: #999;">Total comments checked: ${comments.length}</div>
             `;
-
-        } catch (error) {
-            console.error("API Error:", error);
-            resultDiv.innerHTML = "<strong>Error:</strong> " + error.message;
+        } catch (e) {
+            resultDiv.classList.add('error');
+            resultDiv.innerHTML = "<b>⚠️ Error:</b> " + e.message;
         }
     }
 </script>
