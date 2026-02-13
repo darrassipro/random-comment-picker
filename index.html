@@ -1,125 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>FB Random Comment Picker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أوجادور - اختيار الفائزين من تعليقات فيسبوك</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px; 
-            margin: 0;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
         }
-        .container { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 15px; 
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0 10px 40px rgba(255, 255, 255, 0.3); }
         }
-        h1 { color: #1877f2; text-align: center; margin-top: 0; }
-        .login-section { text-align: center; margin: 20px 0; }
-        .login-section fb\\:login-button { text-align: center; }
-        .picker-section { display: none; }
-        .picker-section.active { display: block; }
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            box-sizing: border-box; 
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        input:focus {
-            outline: none;
-            border-color: #1877f2;
-        }
-        button { 
-            width: 100%; 
-            padding: 12px; 
-            background: linear-gradient(135deg, #1877f2 0%, #0a66c2 100%);
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 16px;
-            margin-top: 10px;
-            transition: transform 0.2s;
-        }
-        button:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(24,119,242,0.4);
-        }
-        button:active { transform: translateY(0); }
-        .result { 
-            margin-top: 20px; 
-            padding: 20px; 
-            background: #f0f7ff; 
-            border-left: 4px solid #1877f2;
-            border-radius: 5px; 
-            display: none;
-            animation: slideIn 0.3s ease-in-out;
-        }
-        .result.active { display: block; }
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .winner-name { color: #1877f2; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
-        .winner-comment { color: #333; font-size: 14px; line-height: 1.5; }
-        .error { background: #ffe0e0; border-left-color: #ff4444; color: #cc0000; }
-        .loading { text-align: center; color: #1877f2; }
-        .user-info { 
-            background: #f5f5f5; 
-            padding: 10px 15px; 
-            border-radius: 5px; 
-            margin: 10px 0; 
-            font-size: 14px; 
-            text-align: center;
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
         }
-        .logout-btn {
-            background: #e0e0e0;
-            color: #333;
-            padding: 8px 16px;
-            font-size: 12px;
-            width: auto;
-            margin-top: 5px;
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .animate-slideIn {
+            animation: slideIn 0.3s ease-out;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-900 font-sans text-right">
 
-<div class="container">
-    <h1>🎉 FB Random Comment Picker</h1>
-    
-    <div class="login-section" id="loginSection">
-        <p>Login to get started:</p>
-        <fb:login-button scope="public_profile,pages_read_engagement" onlogin="checkLoginState();"></fb:login-button>
-        <button onclick="fbLogin()" style="margin-top: 10px; background: #1877f2;">📘 Login with Facebook</button>
+<div class="flex flex-col min-h-screen">
+    <div class="flex-1 flex justify-center items-center p-5 md:p-8">
+        <div class="bg-white rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[600px]">
+            
+            <!-- Hero Section -->
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-10 md:p-12 flex flex-col justify-between order-2 md:order-1">
+                <div>
+                    <div class="inline-block bg-white/15 backdrop-blur-lg px-4 py-2 rounded-full text-xs border border-white/20 mb-5">
+                        <i class="fas fa-lightbulb"></i> المخترع محمد أوجادور
+                    </div>
+
+                    <div class="w-28 h-28 mx-auto mb-8 animate-float">
+                        <div class="w-full h-full rounded-full bg-white/20 flex items-center justify-center border-4 border-white/40 text-5xl shadow-xl animate-pulse-glow">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-8 text-center">
+                        <div class="text-sm opacity-90 font-medium tracking-wider uppercase mb-2">مرحباً بك في</div>
+                        <div class="text-4xl font-bold mb-3">أوجادور</div>
+                    </div>
+
+                    <div class="my-6 text-base leading-relaxed opacity-95">
+                        نظام ذكي لاختيار الفائزين بطريقة عادلة وشفافة من تعليقات منشوراتك على فيسبوك. الحل الأمثل لإدارة مسابقاتك والسحوبات الخاصة بك.
+                    </div>
+
+                    <ul class="my-8 space-y-3">
+                        <li class="text-sm opacity-95 leading-relaxed">
+                            <i class="fas fa-random ml-2"></i> اختيار عشوائي ذكي من جميع التعليقات
+                        </li>
+                        <li class="text-sm opacity-95 leading-relaxed">
+                            <i class="fas fa-balance-scale ml-2"></i> عملية عادلة وشفافة بنسبة 100%
+                        </li>
+                        <li class="text-sm opacity-95 leading-relaxed">
+                            <i class="fas fa-shield-alt ml-2"></i> حماية وأمان متقدم للبيانات
+                        </li>
+                        <li class="text-sm opacity-95 leading-relaxed">
+                            <i class="fas fa-bolt ml-2"></i> نتائج فورية في ثوانٍ معدودة
+                        </li>
+                        <li class="text-sm opacity-95 leading-relaxed">
+                            <i class="fas fa-infinity ml-2"></i> دعم غير محدود للمنشورات
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="pt-5 border-t border-white/20 text-sm opacity-85 text-center">
+                    <i class="fas fa-check-circle"></i> عادل • شفاف • موثوق
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="p-10 md:p-12 flex flex-col justify-center order-1 md:order-2">
+                <div class="mb-9">
+                    <div class="text-2xl font-bold text-gray-900 mb-2">
+                        <i class="fas fa-rocket"></i> ابدأ الآن
+                    </div>
+                    <div class="text-sm text-gray-600">اختر الفائز التالي في ثوانٍ معدودة</div>
+                </div>
+
+                <div id="loginSection" class="text-center">
+                    <p class="text-gray-600 mb-6 text-sm leading-relaxed">
+                        <i class="fas fa-info-circle"></i> قم بتسجيل الدخول باستخدام حساب فيسبوك الخاص بك للوصول إلى أداة اختيار الفائزين
+                    </p>
+                    <button onclick="fbLogin()" class="w-full px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all">
+                        <i class="fab fa-facebook"></i> تسجيل الدخول عبر فيسبوك
+                    </button>
+                </div>
+
+                <div id="pickerSection" class="hidden">
+                    <div id="userInfo" class="bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-3 rounded-lg mb-6 text-sm text-gray-700 border-r-4 border-indigo-500"></div>
+                    
+                    <div class="mb-6">
+                        <label for="postId" class="block mb-2 text-gray-700 font-semibold text-xs uppercase tracking-wider">
+                            <i class="fas fa-link"></i> معرف منشور فيسبوك
+                        </label>
+                        <input type="text" id="postId" placeholder="مثال: 939135105350773" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+                    </div>
+
+                    <div class="flex flex-row-reverse gap-3 mt-8">
+                        <button onclick="fetchComments()" class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all">
+                            <i class="fas fa-dice"></i> اختيار الفائز العشوائي
+                        </button>
+                        <button onclick="logoutFB()" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-300 hover:-translate-y-0.5 transform transition-all">
+                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                        </button>
+                    </div>
+
+                    <div id="result" class="hidden mt-6 p-6 bg-gray-50 rounded-lg border-r-4 border-indigo-500 animate-slideIn"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="picker-section" id="pickerSection">
-        <div class="user-info" id="userInfo"></div>
-        <input type="text" id="postId" placeholder="Enter Post ID (e.g., 939135105350773)">
-        <button onclick="fetchComments()">🎲 Pick Random Winner</button>
-        <button class="logout-btn" onclick="logoutFB()">Logout</button>
-        <div class="result" id="result"></div>
-    </div>
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 px-5 text-center text-sm">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-base font-bold text-gray-100 mb-2">
+                <i class="fas fa-trophy"></i> أوجادور
+            </div>
+            <div class="mb-3">
+                <i class="fas fa-star"></i> اختيار الفائزين من تعليقات الفيسبوك - عادل، شفاف، وآمن
+            </div>
+            <div class="text-xs mt-3 pt-3 border-t border-gray-700">
+                <i class="fas fa-code"></i> تم التطوير بإتقان من قبل <span class="text-gray-200 font-semibold">يونس الدراسي</span> | 
+                <i class="fas fa-lightbulb"></i> الفكرة من ابتكار <span class="text-gray-200 font-semibold">محمد أوجادور</span> | 
+                © 2026
+            </div>
+        </div>
+    </footer>
 </div>
 
 <script>
-    // Your Configuration ID / App ID
     const APP_ID = '889592040642068';
     let accessToken = null;
 
-    // Initialize Facebook SDK
     window.fbAsyncInit = function() {
         FB.init({
             appId: APP_ID,
@@ -127,10 +165,10 @@
             xfbml: true,
             version: 'v19.0'
         });
+        FB.AppEvents.logPageView();
         FB.XFBML.parse();
     };
 
-    // Load the Facebook SDK script
     (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
         if (d.getElementById(id)) return;
@@ -159,38 +197,41 @@
     }
 
     function showPickerUI(userID) {
-        // Get user info
         FB.api('/me', function(response) {
-            document.getElementById('userInfo').innerHTML = `Logged in as: <b>${response.name}</b>`;
+            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-circle"></i> تم تسجيل الدخول باسم: <b class="font-semibold text-gray-900">${response.name}</b>`;
         });
         
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('pickerSection').classList.add('active');
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('pickerSection').classList.remove('hidden');
     }
 
     function logoutFB() {
         FB.logout(function(response) {
             accessToken = null;
-            document.getElementById('pickerSection').classList.remove('active');
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('result').classList.remove('active');
+            document.getElementById('pickerSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
         });
     }
 
     async function fetchComments() {
         if (!accessToken) {
-            alert('Please login first');
+            alert('يرجى تسجيل الدخول أولاً');
             return;
         }
 
         const postId = document.getElementById("postId").value.trim();
         const resultDiv = document.getElementById("result");
         
-        if (!postId) return alert("Enter Post ID");
+        if (!postId) {
+            alert("يرجى إدخال معرف المنشور");
+            return;
+        }
 
-        resultDiv.classList.remove('active');
-        resultDiv.innerHTML = '<div class="loading">🔄 Fetching comments...</div>';
-        resultDiv.classList.add('active');
+        resultDiv.classList.remove('bg-red-50', 'border-red-400', 'text-red-900');
+        resultDiv.classList.remove('hidden');
+        resultDiv.innerHTML = '<div class="text-center text-indigo-600 text-sm"><i class="fas fa-spinner fa-spin"></i> جاري تحميل التعليقات...</div>';
+        resultDiv.classList.remove('hidden');
 
         let comments = [];
         let url = `https://graph.facebook.com/v19.0/${postId}/comments?access_token=${accessToken}&limit=100&fields=id,message,from`;
@@ -207,20 +248,41 @@
             }
 
             if (comments.length === 0) {
-                resultDiv.innerHTML = "No comments found. Check the Post ID or permissions.";
+                resultDiv.innerHTML = "<div class='text-gray-600 text-center'>لم يتم العثور على تعليقات. يرجى التحقق من معرف المنشور والصلاحيات.</div>";
                 return;
             }
 
             const winner = comments[Math.floor(Math.random() * comments.length)];
             resultDiv.innerHTML = `
-                <div class="winner-name">🎊 ${winner.from ? winner.from.name : 'Anonymous'}</div>
-                <div class="winner-comment">"${winner.message}"</div>
-                <div style="margin-top: 10px; font-size: 12px; color: #999;">Total comments checked: ${comments.length}</div>
+                <div class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-1.5 rounded-full text-xs font-bold mb-3 uppercase tracking-wide">
+                    <i class="fas fa-trophy"></i> تم اختيار الفائز
+                </div>
+                <div class="text-gray-900 font-bold text-xl mb-3">
+                    <i class="fas fa-crown"></i> ${winner.from ? winner.from.name : 'مستخدم'}
+                </div>
+                <div class="text-gray-600 text-sm leading-relaxed italic p-3 bg-white rounded-md my-3 border-r-4 border-indigo-500">
+                    <i class="fas fa-quote-right"></i> "${escapeHtml(winner.message)}"
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600">
+                    <i class="fas fa-chart-bar"></i> إجمالي التعليقات المحللة: <strong class="text-gray-700 font-semibold">${comments.length}</strong> • 
+                    <i class="fas fa-random"></i> اختيار عشوائي
+                </div>
             `;
         } catch (e) {
-            resultDiv.classList.add('error');
-            resultDiv.innerHTML = "<b>⚠️ Error:</b> " + e.message;
+            resultDiv.classList.add('bg-red-50', 'border-red-400', 'text-red-900');
+            resultDiv.innerHTML = `<div class="font-semibold"><i class="fas fa-exclamation-triangle"></i> خطأ: ${escapeHtml(e.message)}</div>`;
         }
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
     }
 </script>
 
