@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Comment Picker (Fixed)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; width: 450px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; }
+        h2 { color: #1877f2; margin-bottom: 20px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        input:focus { border-color: #1877f2; }
+        button { width: 95%; padding: 12px; margin: 10px 0; background: #1877f2; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background 0.3s; }
+        button:hover { background: #166fe5; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #status { margin: 10px 0; font-size: 14px; color: #65676b; font-weight: 500; }
+        .result { margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; text-align: left; display: none; border: 1px solid #adcfff; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>FB Random Picker</h2>
+    <div id="status">Initializing SDK...</div>
+    
+    <input type="text" id="postId" placeholder="Enter Facebook Post ID (e.g. 939135105350773)">
+    <button id="pickBtn" onclick="startPicking()" disabled>Login & Pick Winner</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+
+<script>
+    // 1. REPLACE THIS WITH YOUR ACTUAL APP ID
+    const APP_ID = 'YOUR_APP_ID_HERE'; 
+
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId      : APP_ID,
+            cookie     : true,
+            xfbml      : true,
+            version    : 'v19.0'
+        });
+        
+        document.getElementById('status').innerText = "✅ SDK Ready (HTTPS detected)";
+        document.getElementById('pickBtn').disabled = false;
+    };
+
+    function startPicking() {
+        const postId = document.getElementById("postId").value.trim();
+        const resultDiv = document.getElementById("result");
+        
+        if (!postId) {
+            alert("Please enter a Post ID first!");
+            return;
+        }
+
+        // Login with necessary permissions
+        FB.login(function(response) {
+            if (response.authResponse) {
+                const token = response.authResponse.accessToken;
+                fetchComments(postId, token);
+            } else {
+                resultDiv.style.display = "block";
+                resultDiv.innerHTML = "❌ User cancelled login or did not authorize the app.";
+            }
+        }, {scope: 'public_profile,user_posts'}); 
+    }
+
+    async function fetchComments(postId, token) {
+        const resultDiv = document.getElementById("result");
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = "⏳ Fetching comments from Meta... (this may take a moment)";
+
+        let comments = [];
+        // FIXED: Added backticks for template literal
+        let url = `https://graph.facebook.com/v19.0/${postId}/comments?access_token=${token}&limit=100`;
+
+        try {
+            while (url) {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                if (data.data) {
+                    comments = comments.concat(data.data);
+                }
+                
+                // Handle pagination if there are many comments
+                url = (data.paging && data.paging.next) ? data.paging.next : null;
+            }
+
+            if (comments.length === 0) {
+                resultDiv.innerHTML = "ℹ️ No comments found. Note: If the post is private or from a Profile, Meta might return 0 results due to privacy restrictions.";
+                return;
+            }
+
+            // Randomly select one
+            const winner = comments[Math.floor(Math.random() * comments.length)];
+
+            resultDiv.innerHTML = `
+                <strong style="color:#1877f2">🎉 Winner Found!</strong><br><br>
+                <strong>User ID:</strong> ${winner.from ? winner.from.id : 'Hidden'}<br>
+                <strong>Name:</strong> ${winner.from ? winner.from.name : 'Private User'}<br>
+                <strong>Comment:</strong> "${winner.message}"
+            `;
+
+        } catch (error) {
+            console.error("API Error:", error);
+            resultDiv.innerHTML = "<strong>Error:</strong> " + error.message;
+        }
+    }
+</script>
+
+</body>
+</html>
